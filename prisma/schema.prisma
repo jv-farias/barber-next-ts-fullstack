@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+model User {
+  id       String    @id @default(uuid()) // caso o usuário não tenha um id, será gerado um aleatório
+  name     String
+  bookings Booking[]
+}
+
+model Barbershop {
+  id       String    @id @default(uuid())
+  name     String
+  address  String
+  imageUrl String
+  services Service[]
+  bookings Booking[]
+}
+
+model Service {
+  id           String     @id @default(uuid())
+  name         String
+  // sempre vai ter duas casas decimais -> centavos
+  price        Decimal    @db.Decimal(10, 2)
+  barbershopId String
+  // barbershop não irá ser salvo no bd, serve apenas para o prisma saber que o service e o barbershop possuem uma relação
+  // o barbershopId aponta para o id da barbershop
+  barbershop   Barbershop @relation(fields: [barbershopId], references: [id])
+  description  String
+  imageUrl     String
+  bookings     Booking[]
+}
+
+model Booking {
+  id           String     @id @default(uuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  serviceId    String
+  service      Service    @relation(fields: [serviceId], references: [id])
+  date         DateTime
+  barbershopId String
+  barbershop   Barbershop @relation(fields: [barbershopId], references: [id])
+}
