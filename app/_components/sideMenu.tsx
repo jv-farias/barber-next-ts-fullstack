@@ -71,13 +71,12 @@ const SideMenu = () => {
         </div>
 
         {data?.user && (
-          <Button variant="outline" className="justify-start" asChild>
-            <Link href="/bookings">
-              <CalendarIcon size={18} className="mr-2">
-                Agendamentos
-              </CalendarIcon>
-            </Link>
-          </Button>
+        <Button variant="outline" className="justify-start" asChild>
+        <Link href="/">
+          <CalendarIcon size={18} className="mr-2" />
+          Agendamentos
+        </Link>
+      </Button>
         )}
       </SheetHeader>
     </>
