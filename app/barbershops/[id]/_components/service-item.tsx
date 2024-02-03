@@ -6,11 +6,13 @@ import { Card, CardContent } from "@/app/_components/ui/card";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/app/_components/ui/sheet";
 import { Barbershop, Service } from "@prisma/client";
 import { ptBR } from "date-fns/locale";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState, useMemo } from "react";
 import { generateDayTimeList } from "../_helpers/hours";
-import { format } from "date-fns";
+import { format, setHours, setMinutes } from "date-fns";
+import { saveBooking } from "../_actions/saveBooking";
+
 
 interface ServiceItemProps {
     barbershop: Barbershop
@@ -26,6 +28,7 @@ const ServiceItem = ({ service, isAuthenticated, barbershop }: ServiceItemProps)
         }
     }
 
+    const {data} = useSession()
     const [date, setDate] = useState<Date | undefined>(undefined)
     const [hour, setHour] = useState<string | undefined>()
 
@@ -41,6 +44,31 @@ const ServiceItem = ({ service, isAuthenticated, barbershop }: ServiceItemProps)
     const handleTimeClick = (time: string) => {
         setHour(time)
     }
+
+    const handleBookingSubmit = async () => {
+        try {
+
+            if (!hour || !date || !data?.user) {
+                return
+            }
+
+            const dateHour = Number(hour.split(":")[0])
+            const dateMinutes = Number(hour.split(":")[1])
+            const newDate = setMinutes(setHours(date, dateHour), dateMinutes)
+            
+            await saveBooking({
+                serviceId: service.id,
+                barbershopId: barbershop.id,
+                date: newDate,
+                userId:(data.user as any).id
+            })
+        }
+
+        catch(error) {
+            console.log(error)
+        }
+    }
+
 
     return (
         <>
@@ -156,7 +184,7 @@ const ServiceItem = ({ service, isAuthenticated, barbershop }: ServiceItemProps)
                                             </Card>
                                         </div>
                                             <SheetFooter className="px-5 "  >
-                                                <Button disabled={!hour || !date} >Confirmar Reserva</Button>
+                                                <Button onClick={handleBookingSubmit} disabled={!hour || !date} >Confirmar Reserva</Button>
                                             </SheetFooter>
                                     </SheetContent>
                                 </Sheet>
