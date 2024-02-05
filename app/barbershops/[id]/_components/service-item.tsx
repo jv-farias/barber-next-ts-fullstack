@@ -16,6 +16,7 @@ import { Loader2 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { getDayBookings } from "../_actions/getDayBookings";
 
 interface ServiceItemProps {
     barbershop: Barbershop;
@@ -24,7 +25,6 @@ interface ServiceItemProps {
 }
 
 const ServiceItem = ({ service, barbershop, isAuthenticated }: ServiceItemProps) => {
-
 
 
     const router = useRouter();
@@ -37,6 +37,22 @@ const ServiceItem = ({ service, barbershop, isAuthenticated }: ServiceItemProps)
     const [sheetIsOpen, setSheetIsOpen] = useState(false);
     const [dayBookings, setDayBookings] = useState<Booking[]>([]);
 
+
+
+    useEffect(() => {
+
+        if (!date) {
+            return
+        }
+
+        const refreshAvailabeHours = async () => {
+            const _dayBookings = await getDayBookings(barbershop.id, date)
+            setDayBookings(_dayBookings)
+        }
+
+        refreshAvailabeHours()
+
+    }, [date, barbershop.id])
 
 
     const handleDateClick = (date: Date | undefined) => {
@@ -102,9 +118,17 @@ const ServiceItem = ({ service, barbershop, isAuthenticated }: ServiceItemProps)
             return [];
         }
 
+
+        // gerando o filtro de todos os horários
+
         return generateDayTimeList(date).filter((time) => {
+            // time: "09:00"
+            // se houver alguma reserva com a hora e minutos igual a time, não incluir
+
             const timeHour = Number(time.split(":")[0]);
             const timeMinutes = Number(time.split(":")[1]);
+
+            // se tiver algum agendamento, nao quero que o horário seja incluso
 
             const booking = dayBookings.find((booking) => {
                 const bookingHour = booking.date.getHours();
