@@ -15,6 +15,7 @@ import { saveBooking } from "../_actions/saveBooking";
 import { Loader2 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface ServiceItemProps {
     barbershop: Barbershop;
@@ -71,6 +72,22 @@ const ServiceItem = ({ service, barbershop, isAuthenticated }: ServiceItemProps)
                 barbershopId: barbershop.id,
                 date: newDate,
                 userId: (data.user as any).id,
+            });
+
+            setSheetIsOpen(false);
+
+            setHour(undefined)
+            setDate(undefined)
+
+            toast("Reserva realizada ccom sucesso!", {
+                description: format(newDate, "'Dia' dd 'de' MMMM 'às' HH':'mm'.'", {
+                    locale: ptBR,
+                }),
+
+                action: {
+                    label: "Visualizar",
+                    onClick: () => router.push("/bookings"),
+                },
             });
 
         } catch (error) {
@@ -241,7 +258,7 @@ const ServiceItem = ({ service, barbershop, isAuthenticated }: ServiceItemProps)
                         </div>
                     </div>
                 </div>
-            </CardContent>                                          
+            </CardContent>
         </Card>
     );
 };
