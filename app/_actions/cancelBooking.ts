@@ -13,5 +13,6 @@ export const cancelBooking = async (bookingId: string) => {
 
   // Call revalidatePath from a server-side context
   // You might need to wrap this in a server action or an API route
+  revalidatePath("/");
   revalidatePath("/bookings");
 };

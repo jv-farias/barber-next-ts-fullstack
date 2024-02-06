@@ -59,30 +59,31 @@ const BookingsPage = async () => {
             <Header />
             <div className="flex flex-col px-5 py-6" >
                 <h1 className="text-xl font-bold">Agendamentos</h1>
-                <div>
+                {/* TODO: decidir se quando não houver reservas, apareça a mensagem>: "Não há reservas no momento" ou se não aparece a seção por completo */}
 
-                    {/* TODO: decidir se quando não houver reservas, apareça a mensagem>: "Não há reservas no momento" ou se não aparece a seção por completo
-                     {confirmedBookings.length === 0 && finishedBookings.length === 0 &&
-                    (<h2 className="text-gray-400 uppercase font-bold text-sm mt-6 mb-3" >CONFIRMADOS</h2> )}
-                     */}
-
-                    <h2 className="text-gray-400 uppercase font-bold text-sm mt-6 mb-3" >CONFIRMADOS</h2>
-
-                    {confirmedBookings.length === 0 && finishedBookings.length === 0 ? (
+                {confirmedBookings.length > 0 &&
+                    (<>
+                        <h2 className="text-gray-400 uppercase font-bold text-sm mt-6 mb-3">CONFIRMADOS</h2>
                         <div className="flex flex-col gap-3 mt-3">
                             {confirmedBookings.map((booking) => (
                                 <BookingItem booking={booking} key={booking.id} />
                             ))}
                         </div>
-                    ) : (<p className="text-gray-200" >Não há reservas no momento</p>)}
+                    </>)}
 
-                    <h2 className="text-gray-400 uppercase font-bold text-sm mt-6 mb-3" >FINALIZADOS</h2>
-                    <div className="flex flex-col gap-3 mt-3    ">
-                        {finishedBookings.map((booking) => (
-                            <BookingItem booking={booking} key={booking.id} />
-                        ))}
-                    </div>
-                </div>
+
+                {finishedBookings.length > 0 && (
+                    <>
+                        <h2 className="text-gray-400 uppercase font-bold text-sm mt-6 mb-3">FINALIZADOS</h2>
+                        <div className="flex flex-col gap-3 mt-3    ">
+                            {finishedBookings.map((booking) => (
+                                <BookingItem booking={booking} key={booking.id} />
+                            ))}
+                        </div>
+                    </>
+                )}
+
+
             </div>
         </>
 
