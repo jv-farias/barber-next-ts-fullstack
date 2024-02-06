@@ -1,3 +1,5 @@
+"use client"
+
 import { getServerSession } from "next-auth"
 import { db } from "../_lib/prisma"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
@@ -8,8 +10,13 @@ import { Booking, Prisma } from "@prisma/client"
 import { format } from "date-fns/format"
 import { ptBR } from "date-fns/locale"
 import { isFuture, isPast } from "date-fns"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
+import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
 import Image from "next/image"
+import { Button } from "./ui/button"
+import { cancelBooking } from "../_actions/cancelBooking"
+import { toast } from "sonner"
+import { useState } from "react"
+import { Loader2 } from "lucide-react"
 
 interface BookingItemProps {
     booking: Prisma.BookingGetPayload<{
@@ -24,6 +31,22 @@ interface BookingItemProps {
 // quero incluir os serviços dentro do booking, para isso
 
 const BookingItem = ({ booking }: BookingItemProps) => {
+
+    const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+    const handleCancelClick = async () => {
+
+        setIsDeleteLoading(true)
+
+        try {
+            await cancelBooking(booking.id);
+            toast.success("Reserva cancelada com sucesso!")
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setIsDeleteLoading(false)
+        }
+    }
+
 
     const isBookingConfirmed = isFuture(booking.date)
 
@@ -72,20 +95,20 @@ const BookingItem = ({ booking }: BookingItemProps) => {
                         Informações da Reserva
                     </SheetTitle>
                 </SheetHeader>
-                <div className="px-5">
+                <div>
                     <div className="relative h-[180px] w-full mt-6">
                         <Image src="/map.png" fill alt={booking.barbershop.name} />
-                        <div className="w-full absolute bottom-4 left-0 px-6   ">
+                        <div className="w-full absolute bottom-4 left-0 px-3">
                             <Card >
-                                <CardContent className="p-3 flex gap-2 items-center" >
+                                <CardContent className="p-3  flex gap-2 items-center justify-center" >
                                     <Avatar>
                                         <AvatarImage src={booking.barbershop.imageUrl} />
                                     </Avatar>
                                     <div>
-                                        <h2 className="font-bold">
+                                        <h2 className="font-bold overflow-hidden whitespace-nowrap overflow-ellipsis">
                                             {booking.barbershop.name}
                                         </h2>
-                                        <h3 className="text-xs overflow-hidden text-nowrap text-ellipsis">
+                                        <h3 className="text-xs overflow-hidden whitespace-nowrap overflow-ellipsis">
                                             {booking.barbershop.address}
                                         </h3>
                                     </div>
@@ -93,12 +116,57 @@ const BookingItem = ({ booking }: BookingItemProps) => {
                             </Card>
                         </div>
 
-                        
-                    </div>
-                    <Badge variant={isBookingConfirmed ? "default" : "secondary"} className="mt-6 w-fit">{
-                            isBookingConfirmed ? "Confirmado" : "Finalizado"
 
-                        }</Badge>
+                    </div>
+                    <Badge variant={isBookingConfirmed ? "default" : "secondary"} className="my-3 w-fit">{
+                        isBookingConfirmed ? "Confirmado" : "Finalizado"
+
+                    }</Badge>
+                    <Card className="   ">
+                        <CardContent className="p-3 gap-3 flex flex-col">
+                            <div className="flex justify-between">
+                                <h2 className="font-bold">{booking.service.name}</h2>
+                                <h3 className="font-bold text-sm">
+                                    {" "}
+                                    {Intl.NumberFormat("pt-BR", {
+                                        style: "currency",
+                                        currency: "BRL",
+                                    }).format(Number(booking.service.price))}
+                                </h3>
+                            </div>
+
+
+                            <div className="flex justify-between">
+                                <h3 className="text-gray-400 text-sm">Data</h3>
+                                <h4 className="text-sm">
+                                    {format(booking.date, "dd 'de' MMMM", {
+                                        locale: ptBR,
+                                    })}
+                                </h4>
+                            </div>
+
+
+                            {booking.date && (
+                                <div className="flex justify-between">
+                                    <h3 className="text-gray-400 text-sm">Horário</h3>
+                                    <h4 className="text-sm">{format(booking.date, "hh:mm", {
+                                        locale: ptBR,
+                                    })}</h4>
+                                </div>
+                            )}
+
+                            <div className="flex justify-between">
+                                <h3 className="text-gray-400 text-sm">Barbearia</h3>
+                                <h4 className="text-sm">{booking.barbershop.name}</h4>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <SheetFooter className="mt-3 flex flex-row gap-3 justify-center" >
+                        <SheetClose>
+                            <Button className="w-full" variant="secondary" >Voltar</Button>
+                        </SheetClose>
+                        <Button disabled={!isBookingConfirmed || isDeleteLoading} onClick={handleCancelClick} className="w-full" variant="destructive">  {isDeleteLoading && <Loader2 className="mr-2 h-4 w-4 " />} Cancelar Reserva</Button>
+                    </SheetFooter>
                 </div>
             </SheetContent>
         </Sheet>
