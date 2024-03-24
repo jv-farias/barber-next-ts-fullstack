@@ -161,7 +161,7 @@ const ServiceItem = ({ service, barbershop, isAuthenticated }: ServiceItemProps)
 
                     <div className="flex flex-col w-full">
                         <h2 className="font-bold">{service.name}</h2>
-                        <p className="text-sm text-gray-400">{service.description}</p>
+          
 
                         <div className="flex items-center justify-between mt-3">
                             <p className="text-primary text-sm font-bold">
